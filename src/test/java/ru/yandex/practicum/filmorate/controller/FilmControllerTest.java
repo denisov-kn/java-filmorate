@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Marker;
 import ru.yandex.practicum.filmorate.utils.Equals;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -38,6 +39,8 @@ class FilmControllerTest {
     public void shouldCreateFilm() {
         Film film = new Film();
         film.setName("Фильм1");
+        film.setDuration(100);
+        film.setReleaseDate(LocalDate.of(2000,1,1));
         Set<ConstraintViolation<Film>> violations = validator.validate(film, Marker.Create.class);
         Assertions.assertEquals(0, violations.size(), "список нарушений должен быть пустым");
     }
@@ -70,7 +73,7 @@ class FilmControllerTest {
     }
 
     @Test
-    @DisplayName("Должен обновлять фильм")
+    @DisplayName("должен обновлять фильм")
     public void shouldUpdateFilm() {
         Film film = new Film();
         film.setName("Фильм1");

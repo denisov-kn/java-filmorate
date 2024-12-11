@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
-import ru.yandex.practicum.filmorate.controller.Marker;
+
 import java.time.LocalDate;
 
 @Data
@@ -20,6 +20,7 @@ public class User {
 
     private String name;
 
+    @NotNull (message = "День рождения не может отсутствовать", groups = {Marker.Create.class, Marker.Update.class})
     @Past (message = "День рождения не может быть в будущем", groups = {Marker.Update.class, Marker.Create.class})
     private LocalDate birthday;
 

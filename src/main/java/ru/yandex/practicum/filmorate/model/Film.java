@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
-import ru.yandex.practicum.filmorate.controller.Marker;
+
 import java.time.LocalDate;
 
 
@@ -25,10 +25,12 @@ public class Film {
             })
     private String description;
 
+    @NotNull (message = "Дата релиза не может отсутствовать", groups = {Marker.Create.class, Marker.Update.class})
     @Past (message = "Дата релиза не может быть в будущем", groups = {Marker.Create.class, Marker.Update.class})
     private LocalDate releaseDate;
 
-    @Positive  (message = "Длительность фильма должно быть больше 0")
+    @NotNull (message = "Длительность фильма не может отсутствовать", groups = {Marker.Create.class, Marker.Update.class})
+    @Positive  (message = "Длительность фильма должно быть больше 0", groups = {Marker.Create.class, Marker.Update.class})
     private Integer duration;
 
     @AssertTrue (message = "Дата фильма не может быть раньше чем 28.12.1895")

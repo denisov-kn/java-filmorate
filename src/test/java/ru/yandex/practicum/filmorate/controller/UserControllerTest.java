@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Marker;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.utils.Equals;
 
@@ -40,6 +41,7 @@ class UserControllerTest {
         User user = new User();
         user.setEmail("123@gmail.com");
         user.setLogin("123");
+        user.setBirthday(LocalDate.of(2000,1,1));
         Set<ConstraintViolation<User>> violations = validator.validate(user, Marker.Create.class);
         Assertions.assertEquals(0, violations.size(), "список нарушений должен быть пустым");
     }
