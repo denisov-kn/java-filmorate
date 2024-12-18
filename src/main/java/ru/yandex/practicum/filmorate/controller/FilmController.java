@@ -1,33 +1,32 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Marker;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @Validated
 @RestController
 @RequestMapping("/films")
+@RequiredArgsConstructor
 public class FilmController {
 
-    private Map<Integer, Film> films = new HashMap<>();
+    private final FilmService filmService;
 
 
     @Validated(Marker.Create.class)
     @PostMapping
     public Film createFilm(@RequestBody @Valid  Film film) {
         log.info("Входящая объект: " + film);
-        film.setId(getNextId());
-        films.put(film.getId(), film);
+        filmService.createFilm(film);
         log.info("Созданный объект " + film);
         return film;
     }
@@ -36,28 +35,19 @@ public class FilmController {
     @PutMapping
     public Film updateFilm(@RequestBody @Valid Film film) {
         log.info("Входящая объект: " + film);
-        if (!films.containsKey(film.getId()))
-            throw new NotFoundException("Фильм с таким id: " + film.getId() + " не найден");
-        films.replace(film.getId(), film);
+        filmService.updateFilm(film);
         log.info("Обновленный объект: " + film);
-        return  film;
+        return film;
     }
 
 
     @GetMapping
     public Collection<Film> findAll() {
-        log.info("Возвращаемый массив фильмов: " + films.values());
-        return new ArrayList<>(films.values());
+    //    log.info("Возвращаемый массив фильмов: " + films.values());
+        return filmService.findAllFilms();
     }
 
 
 
-    private Integer getNextId() {
-        Integer currentMaxId = films.keySet()
-                .stream()
-                .mapToInt(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
-    }
+
 }

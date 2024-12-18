@@ -12,6 +12,8 @@ import org.springframework.test.context.ActiveProfiles;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Marker;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.utils.Equals;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -23,15 +25,21 @@ class FilmControllerTest {
 
     private static final Validator validator;
     private FilmController filmController;
+    private InMemoryFilmStorage inMemoryFilmStorage;
+    private FilmService filmService;
 
     static {
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
         validator = validatorFactory.usingContext().getValidator();
+
+
     }
 
     @BeforeEach
     public void beforeEach() {
-        filmController = new FilmController();
+        inMemoryFilmStorage  = new InMemoryFilmStorage();
+        filmService = new FilmService(inMemoryFilmStorage);
+        filmController = new FilmController(filmService);
     }
 
     @Test

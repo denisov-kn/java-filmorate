@@ -4,6 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 public class User {
@@ -19,6 +20,10 @@ public class User {
     private String login;
 
     private String name;
+
+    private Set<Long> friends;
+
+    private Set<Long> filmsLikes;
 
     @NotNull (message = "День рождения не может отсутствовать", groups = {Marker.Create.class, Marker.Update.class})
     @Past (message = "День рождения не может быть в будущем", groups = {Marker.Update.class, Marker.Create.class})
