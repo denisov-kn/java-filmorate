@@ -7,12 +7,22 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 @ControllerAdvice
 public class ErrorHandlingControllerAdvice {
+
+    @ResponseBody
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handlerNotFound(final NotFoundException e) {
+        return new ErrorResponse(
+                e.getMessage()
+        );
+    }
 
     @ResponseBody
     @ExceptionHandler(ConstraintViolationException.class)
@@ -42,5 +52,7 @@ public class ErrorHandlingControllerAdvice {
                 .collect(Collectors.toList());
         return new ValidationErrorResponse(violations);
     }
+
+
 
 }

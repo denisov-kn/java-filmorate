@@ -2,21 +2,15 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Marker;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-@Slf4j
+
 @Validated
 @RestController
 @RequestMapping("/users")
@@ -28,18 +22,18 @@ public class UserController {
     @Validated(Marker.Create.class)
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
-        log.info("Входящий объект: " + user);
+     //   log.info("Входящий объект: " + user);
         userService.addUser(user);
-        log.info("Созданный объект: " + user);
+    //    log.info("Созданный объект: " + user);
         return user;
     }
 
     @Validated(Marker.Update.class)
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        log.info("Входящий объект: " + user);
+    //    log.info("Входящий объект: " + user);
         userService.updateUser(user);
-        log.info("Обновленный объект:" + user);
+     //   log.info("Обновленный объект:" + user);
         return user;
     }
 
@@ -49,6 +43,30 @@ public class UserController {
         return userService.findAllUsers();
     }
 
+    @GetMapping("/{id}")
+    public User findUserById(@PathVariable Integer id) {
+        return userService.findUserById(id);
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public User putFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+        return userService.putFriend(id,friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public User deleteFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+        return  userService.deleteFriend(id,friendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public Collection<User> getFriends(@PathVariable Integer id){
+        return userService.getFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public Collection<User> getMutualFriends(@PathVariable Integer id, @PathVariable Integer otherId){
+        return userService.getMutualFriends(id,otherId);
+    }
 
 }
 

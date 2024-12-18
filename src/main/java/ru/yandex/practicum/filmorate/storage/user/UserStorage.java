@@ -9,4 +9,5 @@ interface UserStorage {
     User updateUser(User user);
     Collection<User> findAllUsers();
     boolean isUserById(Integer id);
+    User findUserById(Integer id);
 }

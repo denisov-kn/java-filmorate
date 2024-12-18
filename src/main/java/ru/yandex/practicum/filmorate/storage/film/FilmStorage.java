@@ -10,6 +10,7 @@ interface FilmStorage {
     Film updateFilm(Film film);
     Collection<Film> findAllFilms();
     boolean isFilmById(Integer id);
+    Film findFilmById(Integer id);
 
 
 }

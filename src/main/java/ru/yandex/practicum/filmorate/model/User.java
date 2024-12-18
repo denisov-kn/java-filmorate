@@ -4,6 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -21,9 +22,9 @@ public class User {
 
     private String name;
 
-    private Set<Long> friends;
+    private Set<Integer> friends = new HashSet<>();
 
-    private Set<Long> filmsLikes;
+    private Set<Integer> filmsLikes = new HashSet<>();
 
     @NotNull (message = "День рождения не может отсутствовать", groups = {Marker.Create.class, Marker.Update.class})
     @Past (message = "День рождения не может быть в будущем", groups = {Marker.Update.class, Marker.Create.class})
