@@ -79,6 +79,7 @@ public class UserService {
         if (!inMemoryUserStorage.isUserById(id))
             throw new NotFoundException("Пользователь с таким id: " + id + " не найден");
     }
+
     private void checkLogin(User user) {
         if (user.getName() == null)
             user.setName(user.getLogin());
