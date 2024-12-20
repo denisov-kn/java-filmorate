@@ -16,4 +16,12 @@ interface FilmStorage {
 
     Film findFilmById(Integer id);
 
+    void putLike(Integer filmId, Integer userId);
+
+    boolean isUserLikesFilm(Integer filmId, Integer userId);
+
+    void deleteLike(Integer filmId, Integer userId);
+
+    Collection<Film> getPopularFilms(Integer count);
+
 }

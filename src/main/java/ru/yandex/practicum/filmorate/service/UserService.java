@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.IncorrectFriendsException;
+import ru.yandex.practicum.filmorate.exception.DuplicatedIdFriendsException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
@@ -30,12 +30,6 @@ public class UserService {
         return user;
     }
 
-    public void checkUserById(Integer id) {
-        if (!inMemoryUserStorage.isUserById(id))
-            throw new NotFoundException("Пользователь с таким id: " + id + " не найден");
-    }
-
-
     public Collection<User> findAllUsers() {
         return inMemoryUserStorage.findAllUsers();
     }
@@ -45,53 +39,46 @@ public class UserService {
         return inMemoryUserStorage.findUserById(id);
     }
 
-    public User putFriend(Integer userId, Integer friendId) {
+    public Set<Integer> putFriend(Integer userId, Integer friendId) {
 
         if (userId.equals(friendId)) {
-            throw new IncorrectFriendsException("Нельзя добавить пользователя другом самому себе id: "
+            throw new DuplicatedIdFriendsException("Нельзя добавить пользователя другом самому себе id: "
                     + userId + " friendId: " + friendId);
         }
 
-        User user = findUserById(userId);
-        User userFriend = findUserById(friendId);
-        user.getFriends().add(friendId);
-        userFriend.getFriends().add(userId);
-        return user;
+        checkUserById(userId);
+        checkUserById(friendId);
+        return inMemoryUserStorage.putFriend(userId, friendId);
     }
 
     public User deleteFriend(Integer userId, Integer friendId) {
         User user = findUserById(userId);
-        User userFriend = findUserById(friendId);
-        user.getFriends().remove(friendId);
-        userFriend.getFriends().remove(userId);
+        checkUserById(friendId);
+        if (!inMemoryUserStorage.isFriends(userId, friendId))
+           return user;
+        inMemoryUserStorage.deleteFriend(userId, friendId);
         return user;
     }
 
     public Collection<User> getFriends(Integer userId) {
-        User user = findUserById(userId);
-
-        return user.getFriends().stream()
+        checkUserById(userId);
+        return inMemoryUserStorage.getFriends(userId).stream()
                 .map(inMemoryUserStorage::findUserById)
                 .collect(Collectors.toList());
     }
 
     public Collection<User> getMutualFriends(Integer userId, Integer otherId) {
-        User user = findUserById(userId);
-        User otherUser = findUserById(otherId);
+        checkUserById(userId);
+        checkUserById(otherId);
 
-        Set<Integer> userFriends = new java.util.HashSet<>(Set.copyOf(user.getFriends()));
-        Set<Integer> userOtherFriends = Set.copyOf(otherUser.getFriends());
-
-        userFriends.retainAll(userOtherFriends);
-
-        return userFriends.stream()
-                .map(inMemoryUserStorage::findUserById)
-                .collect(Collectors.toList());
+        return inMemoryUserStorage.getMutualFriends(userId, otherId);
 
     }
 
-
-
+    private void checkUserById(Integer id) {
+        if (!inMemoryUserStorage.isUserById(id))
+            throw new NotFoundException("Пользователь с таким id: " + id + " не найден");
+    }
     private void checkLogin(User user) {
         if (user.getName() == null)
             user.setName(user.getLogin());

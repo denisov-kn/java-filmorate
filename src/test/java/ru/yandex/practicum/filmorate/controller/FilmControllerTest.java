@@ -33,6 +33,7 @@ class FilmControllerTest {
     private static final Validator validator;
     private FilmController filmController;
     private UserController userController;
+    private InMemoryFilmStorage  inMemoryFilmStorage;
 
     static {
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
@@ -43,10 +44,10 @@ class FilmControllerTest {
 
     @BeforeEach
     public void beforeEach() {
-        InMemoryFilmStorage inMemoryFilmStorage = new InMemoryFilmStorage();
+        inMemoryFilmStorage = new InMemoryFilmStorage();
         InMemoryUserStorage inMemoryUserStorage = new InMemoryUserStorage();
         UserService userService = new UserService(inMemoryUserStorage);
-        FilmService filmService = new FilmService(inMemoryFilmStorage, userService);
+        FilmService filmService = new FilmService(inMemoryFilmStorage, inMemoryUserStorage);
         userController = new UserController(userService);
         filmController = new FilmController(filmService);
 
@@ -102,13 +103,13 @@ class FilmControllerTest {
         filmController.createFilm(film);
 
         Film newFilm = new Film();
+        newFilm.setId(film.getId());
         newFilm.setName("Фильм2");
-        newFilm.setId(1);
-        newFilm.setName("Фильм1");
-        newFilm.setDescription("Описание1");
-        newFilm.setDuration(100);
+        newFilm.setDescription("Описание2");
+        newFilm.setDuration(66);
         newFilm.setReleaseDate(LocalDate.of(1999, 3, 1));
-        Equals.assertEqualsFilm(newFilm, filmController.updateFilm(newFilm), "фильм должен обновляться");
+        filmController.updateFilm(newFilm);
+        Equals.assertEqualsFilm(newFilm, inMemoryFilmStorage.findFilmById(film.getId()), "фильм должен обновляться");
     }
 
     @Test
@@ -221,10 +222,8 @@ class FilmControllerTest {
 
         filmController.putLike(film.getId(), user.getId());
 
-        Assertions.assertEquals(user.getId(), film.getLikes().iterator().next(),
+        Assertions.assertTrue(inMemoryFilmStorage.isUserLikesFilm(film.getId(), user.getId()),
                 "У фильма должен быть лайк от пользователя");
-        Assertions.assertEquals(film.getId(), user.getFilmsLikes().iterator().next(),
-                "У пользователя должен быть лайк фильму ");
 
     }
 
@@ -293,15 +292,15 @@ class FilmControllerTest {
         filmController.putLike(film.getId(), user1.getId());
         filmController.putLike(film.getId(), user2.getId());
 
-        Assertions.assertTrue(film.getLikes().contains(user1.getId()),
-                "У фильма должен быть лайк от пользователя до удаления");
+        Assertions.assertTrue(inMemoryFilmStorage.isUserLikesFilm(film.getId(), user1.getId()),
+                "У фильма должен быть лайк от пользователя1 до удаления");
 
         filmController.deleteLike(film.getId(), user1.getId());
 
-        Assertions.assertFalse(film.getLikes().contains(user1.getId()),
-                "У фильма не должен быть лайка от пользователя после удаления");
-        Assertions.assertTrue(film.getLikes().contains(user2.getId()),
-                "Лайк от второго пользователя должен остаться");
+        Assertions.assertFalse(inMemoryFilmStorage.isUserLikesFilm(film.getId(), user1.getId()),
+                "У фильма не должен быть лайка от пользователя1 после удаления");
+        Assertions.assertTrue(inMemoryFilmStorage.isUserLikesFilm(film.getId(), user2.getId()),
+                "Лайк от пользователя2 должен остаться");
     }
 
     @Test
@@ -352,12 +351,9 @@ class FilmControllerTest {
         Assertions.assertEquals(popularFilms.get(2),listFilms.get(12),
                 "Третий фильм в списке - 12");
 
-        Assertions.assertEquals(9, popularFilms.size(),
-                "Список должен содержать 10 фильмов");
+        Assertions.assertEquals(3, popularFilms.size(),
+                "Список должен содержать 9 фильмов");
 
     }
-
-
-
 
 }

@@ -4,11 +4,13 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
 
-    private Map<Integer, Film> films = new HashMap<>();
+    private final Map<Integer, Film> films = new HashMap<>();
+    private final Map<Integer, Set<Integer>> likes = new HashMap<>();
 
     @Override
     public Film addFilm(Film film) {
@@ -19,8 +21,8 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-
-        return film;
+       films.replace(film.getId(), film);
+       return film;
     }
 
     @Override
@@ -36,6 +38,32 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film findFilmById(Integer id) {
         return films.get(id);
+    }
+
+    @Override
+    public void putLike(Integer filmId, Integer userId) {
+        if (!likes.containsKey(filmId))
+            likes.put(filmId, new HashSet<>());
+        likes.get(filmId).add(userId);
+    }
+
+    @Override
+    public boolean isUserLikesFilm(Integer filmId, Integer userId) {
+        return likes.containsKey(filmId) && likes.get(filmId).contains(userId);
+    }
+
+    @Override
+    public void deleteLike(Integer filmId, Integer userId) {
+        likes.get(filmId).remove(userId);
+    }
+
+    @Override
+    public Collection<Film> getPopularFilms(Integer count) {
+        return likes.entrySet().stream()
+                .sorted((entry1, entry2) -> Integer.compare(entry2.getValue().size(), entry1.getValue().size()))
+                .limit(count)
+                .map(entry -> films.get(entry.getKey()))
+                .collect(Collectors.toList());
     }
 
 

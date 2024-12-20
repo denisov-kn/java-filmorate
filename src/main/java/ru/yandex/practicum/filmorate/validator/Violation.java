@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.violation;
+package ru.yandex.practicum.filmorate.validator;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

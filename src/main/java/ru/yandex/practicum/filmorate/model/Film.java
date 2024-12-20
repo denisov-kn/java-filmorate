@@ -5,8 +5,6 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
 
 @Data
@@ -34,8 +32,6 @@ public class Film {
     @NotNull (message = "Длительность фильма не может отсутствовать", groups = {Marker.Create.class, Marker.Update.class})
     @Positive  (message = "Длительность фильма должно быть больше 0", groups = {Marker.Create.class, Marker.Update.class})
     private Integer duration;
-
-    private Set<Integer> likes = new HashSet<>();
 
     @AssertTrue (message = "Дата фильма не может быть раньше чем 28.12.1895")
     public boolean isValidateReleaseDate() {

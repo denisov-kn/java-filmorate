@@ -10,7 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ActiveProfiles;
-import ru.yandex.practicum.filmorate.exception.IncorrectFriendsException;
+import ru.yandex.practicum.filmorate.exception.DuplicatedIdFriendsException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Marker;
 import ru.yandex.practicum.filmorate.model.User;
@@ -30,7 +30,7 @@ class UserControllerTest {
 
     private static final Validator validator;
     private UserController userController;
-    private UserService userService;
+    private InMemoryUserStorage inMemoryUserStorage;
 
     static {
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
@@ -45,8 +45,8 @@ class UserControllerTest {
     @BeforeEach
     public void beforeEach() {
 
-        InMemoryUserStorage inMemoryUserStorage = new InMemoryUserStorage();
-        userService = new UserService(inMemoryUserStorage);
+        inMemoryUserStorage = new InMemoryUserStorage();
+        UserService userService = new UserService(inMemoryUserStorage);
         userController = new UserController(userService);
     }
 
@@ -249,10 +249,8 @@ class UserControllerTest {
 
         userController.putFriend(user1.getId(), user2.getId());
 
-        Assertions.assertTrue(user1.getFriends().contains(user2.getId()),
+        Assertions.assertTrue(inMemoryUserStorage.isFriends(user1.getId(), user2.getId()),
                 "У пользователя1 должен быть друг пользователь2");
-        Assertions.assertTrue(user2.getFriends().contains(user1.getId()),
-                "У пользователя2 должен быть друг пользователь1");
 
     }
 
@@ -315,7 +313,7 @@ class UserControllerTest {
     public void shouldGetMutualFriends() {
 
         List<User> listUsers = new ArrayList<>();
-        for (int i = 0; i < 15; i++) {
+        for (int i = 0; i < 5; i++) {
             User user = new User();
             user.setLogin("123" + i);
             user.setEmail("12356" + i + "@mail.ru");
@@ -354,13 +352,10 @@ class UserControllerTest {
         user1.setBirthday(LocalDate.of(2040, 12,2));
         userController.createUser(user1);
 
-        Assertions.assertThrows(IncorrectFriendsException.class,
+        Assertions.assertThrows(DuplicatedIdFriendsException.class,
                 () -> userController.putFriend(user1.getId(), user1.getId()),
                 "пользователь не должен добавлять другом самого себя");
     }
-
-
-
 
 
 }

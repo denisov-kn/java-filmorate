@@ -1,25 +1,37 @@
-package ru.yandex.practicum.filmorate.violation;
+package ru.yandex.practicum.filmorate.validator;
 
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import ru.yandex.practicum.filmorate.exception.IncorrectFriendsException;
+import ru.yandex.practicum.filmorate.exception.DuplicatedIdFriendsException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @ControllerAdvice
 public class ErrorHandlingControllerAdvice {
 
     @ResponseBody
-    @ExceptionHandler(IncorrectFriendsException.class)
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handlerException(final Exception e) {
+        log.warn("Error", e);
+        return new ErrorResponse(
+                e.getMessage()
+        );
+    }
+
+    @ResponseBody
+    @ExceptionHandler(DuplicatedIdFriendsException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handlerIncorrectFriends(final IncorrectFriendsException e) {
+    public ErrorResponse handlerIncorrectFriends(final DuplicatedIdFriendsException e) {
         return new ErrorResponse(
                 e.getMessage()
         );
@@ -62,7 +74,5 @@ public class ErrorHandlingControllerAdvice {
                 .collect(Collectors.toList());
         return new ValidationErrorResponse(violations);
     }
-
-
 
 }

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.violation;
+package ru.yandex.practicum.filmorate.validator;
 
 public class ErrorResponse {
     private final String error;
