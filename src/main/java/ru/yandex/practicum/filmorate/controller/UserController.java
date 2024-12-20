@@ -22,24 +22,19 @@ public class UserController {
     @Validated(Marker.Create.class)
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
-     //   log.info("Входящий объект: " + user);
         userService.addUser(user);
-    //    log.info("Созданный объект: " + user);
         return user;
     }
 
     @Validated(Marker.Update.class)
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-    //    log.info("Входящий объект: " + user);
         userService.updateUser(user);
-     //   log.info("Обновленный объект:" + user);
         return user;
     }
 
     @GetMapping
     public Collection<User> findAll() {
-      //  log.info("Возвращаемый массив пользователей: " + users.values());
         return userService.findAllUsers();
     }
 
@@ -59,12 +54,12 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    public Collection<User> getFriends(@PathVariable Integer id){
+    public Collection<User> getFriends(@PathVariable Integer id) {
         return userService.getFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public Collection<User> getMutualFriends(@PathVariable Integer id, @PathVariable Integer otherId){
+    public Collection<User> getMutualFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         return userService.getMutualFriends(id,otherId);
     }
 

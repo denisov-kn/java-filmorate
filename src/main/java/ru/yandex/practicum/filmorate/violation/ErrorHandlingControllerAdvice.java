@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import ru.yandex.practicum.filmorate.exception.IncorrectFriendsException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 
 import java.util.List;
@@ -14,6 +15,15 @@ import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class ErrorHandlingControllerAdvice {
+
+    @ResponseBody
+    @ExceptionHandler(IncorrectFriendsException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handlerIncorrectFriends(final IncorrectFriendsException e) {
+        return new ErrorResponse(
+                e.getMessage()
+        );
+    }
 
     @ResponseBody
     @ExceptionHandler(NotFoundException.class)

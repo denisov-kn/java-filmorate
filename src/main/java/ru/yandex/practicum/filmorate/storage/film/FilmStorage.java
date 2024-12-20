@@ -7,10 +7,13 @@ import java.util.Collection;
 interface FilmStorage {
 
     Film addFilm(Film film);
-    Film updateFilm(Film film);
-    Collection<Film> findAllFilms();
-    boolean isFilmById(Integer id);
-    Film findFilmById(Integer id);
 
+    Film updateFilm(Film film);
+
+    Collection<Film> findAllFilms();
+
+    boolean isFilmById(Integer id);
+
+    Film findFilmById(Integer id);
 
 }

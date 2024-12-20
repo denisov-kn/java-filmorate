@@ -4,8 +4,8 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.*;
-@Component
 
+@Component
 public class InMemoryFilmStorage implements FilmStorage {
 
     private Map<Integer, Film> films = new HashMap<>();

@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,7 +47,7 @@ public class FilmService {
         userService.checkUserById(userId);
         Film film = inMemoryFilmStorage.findFilmById(filmId);
 
-        if(!film.getLikes().contains(userId))
+        if (!film.getLikes().contains(userId))
             throw new NotFoundException("У фильма c id " + filmId
                     + " нет лайка от такого пользователя: UserId" + userId);
         film.getLikes().remove(userId);
@@ -59,13 +58,10 @@ public class FilmService {
 
     public Collection<Film> getPopularFilms(Integer count) {
         return inMemoryFilmStorage.findAllFilms().stream()
-                .filter(film -> !film.getLikes().isEmpty())
                 .sorted((film1, film2) -> Integer.compare(film2.getLikes().size(), film1.getLikes().size()))
                 .limit(count)
                 .collect(Collectors.toList());
     }
-
-
 
     public Collection<Film> findAllFilms() {
        return inMemoryFilmStorage.findAllFilms();

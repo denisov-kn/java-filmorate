@@ -2,13 +2,12 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.IncorrectFriendsException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -47,6 +46,12 @@ public class UserService {
     }
 
     public User putFriend(Integer userId, Integer friendId) {
+
+        if (userId.equals(friendId)) {
+            throw new IncorrectFriendsException("Нельзя добавить пользователя другом самому себе id: "
+                    + userId + " friendId: " + friendId);
+        }
+
         User user = findUserById(userId);
         User userFriend = findUserById(friendId);
         user.getFriends().add(friendId);
