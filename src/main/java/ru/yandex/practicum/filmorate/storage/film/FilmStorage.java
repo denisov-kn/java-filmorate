@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
+import java.util.Optional;
 
 interface FilmStorage {
 
@@ -14,7 +15,7 @@ interface FilmStorage {
 
     boolean isFilmById(Integer id);
 
-    Film findFilmById(Integer id);
+    Optional<Film> findFilmById(Integer id);
 
     void putLike(Integer filmId, Integer userId);
 

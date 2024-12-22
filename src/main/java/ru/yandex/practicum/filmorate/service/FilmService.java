@@ -21,30 +21,27 @@ public class FilmService {
     }
 
     public Film updateFilm(Film film) {
-        checkFilmById(film.getId());
+        findFilmById(film.getId());
         return inMemoryFilmStorage.updateFilm(film);
 
     }
 
 
     public Film findFilmById(Integer id) {
-        checkFilmById(id);
-        return inMemoryFilmStorage.findFilmById(id);
+        return inMemoryFilmStorage.findFilmById(id)
+                .orElseThrow(() -> new NotFoundException("Фильм с таким id: " + id + " не найден"));
     }
 
     public Film putLike(Integer filmId, Integer userId) {
-        checkFilmById(filmId);
         checkUserById(userId);
-        Film film = inMemoryFilmStorage.findFilmById(filmId);
+        Film film = findFilmById(filmId);
         inMemoryFilmStorage.putLike(filmId,userId);
         return film;
     }
 
     public Film deleteLike(Integer filmId, Integer userId) {
-        checkFilmById(filmId);
         checkUserById(userId);
-        Film film = inMemoryFilmStorage.findFilmById(filmId);
-
+        Film film = findFilmById(filmId);
         if (!inMemoryFilmStorage.isUserLikesFilm(filmId,userId))
             throw new NotFoundException("У фильма c id " + filmId
                     + " нет лайка от такого пользователя: UserId" + userId);
@@ -61,13 +58,6 @@ public class FilmService {
     public Collection<Film> findAllFilms() {
        return inMemoryFilmStorage.findAllFilms();
     }
-
-
-    private void checkFilmById(Integer id) {
-        if (!inMemoryFilmStorage.isFilmById(id))
-            throw new NotFoundException("Фильм с таким id: " + id + " не найден");
-    }
-
 
     private void checkUserById(Integer id) {
         if (!inMemoryUserStorage.isUserById(id))

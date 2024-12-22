@@ -36,15 +36,16 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film findFilmById(Integer id) {
-        return films.get(id);
+    public Optional<Film> findFilmById(Integer id) {
+        return  Optional.ofNullable(films.get(id));
     }
 
     @Override
     public void putLike(Integer filmId, Integer userId) {
         if (!likes.containsKey(filmId))
-            likes.put(filmId, new HashSet<>());
-        likes.get(filmId).add(userId);
+            likes.put(filmId, new HashSet<>(Set.of(userId)));
+        else
+            likes.get(filmId).add(userId);
     }
 
     @Override

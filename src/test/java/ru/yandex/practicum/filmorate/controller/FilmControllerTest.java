@@ -109,7 +109,7 @@ class FilmControllerTest {
         newFilm.setDuration(66);
         newFilm.setReleaseDate(LocalDate.of(1999, 3, 1));
         filmController.updateFilm(newFilm);
-        Equals.assertEqualsFilm(newFilm, inMemoryFilmStorage.findFilmById(film.getId()), "фильм должен обновляться");
+        Equals.assertEqualsFilm(newFilm, filmController.getFilmById(film.getId()), "фильм должен обновляться");
     }
 
     @Test

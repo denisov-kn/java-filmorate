@@ -10,7 +10,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     private final Map<Integer, User> users = new HashMap<>();
     private final Map<Integer, Set<Integer>> friends = new HashMap<>();
-    private final Map<Integer, Set<Integer>> filmsLikes  = new HashMap<>();
 
     @Override
     public User addUser(User user) {
@@ -36,19 +35,22 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User findUserById(Integer id) {
-        return users.get(id);
+    public Optional<User> findUserById(Integer id) {
+        return Optional.ofNullable(users.get(id));
     }
 
     @Override
     public Set<Integer> putFriend(Integer userId, Integer friendId) {
         if (!friends.containsKey(userId))
-            friends.put(userId, new HashSet<Integer>());
-        friends.get(userId).add(friendId);
+            friends.put(userId, new HashSet<>(Set.of(friendId)));
+        else
+            friends.get(userId).add(friendId);
 
         if (!friends.containsKey(friendId))
-            friends.put(friendId, new HashSet<Integer>());
-        friends.get(friendId).add(userId);
+            friends.put(friendId, new HashSet<>(Set.of(userId)));
+        else
+            friends.get(friendId).add(userId);
+
         return friends.get(userId);
     }
 
