@@ -25,8 +25,7 @@ public class FilmService {
         return inMemoryFilmStorage.updateFilm(film);
 
     }
-
-
+    
     public Film findFilmById(Integer id) {
         return inMemoryFilmStorage.findFilmById(id)
                 .orElseThrow(() -> new NotFoundException("Фильм с таким id: " + id + " не найден"));
