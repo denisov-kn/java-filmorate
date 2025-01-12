@@ -1,66 +1,93 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Marker;
 import ru.yandex.practicum.filmorate.model.User;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import ru.yandex.practicum.filmorate.service.UserService;
+
+import java.util.*;
 
 @Slf4j
 @Validated
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
 
-    private final Map<Integer, User> users = new HashMap<>();
+    private final UserService userService;
 
     @Validated(Marker.Create.class)
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
-        log.info("Входящий объект: " + user);
-        user.setId(getNextId());
-        checkLogin(user);
-        users.put(user.getId(),user);
-        log.info("Созданный объект: " + user);
+        log.info("Входящая объект: " + user);
+        userService.addUser(user);
+        log.info("Созданный объект " + user);
         return user;
     }
 
     @Validated(Marker.Update.class)
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        log.info("Входящий объект: " + user);
-        if (!users.containsKey(user.getId()))
-            throw new NotFoundException("Пользователь с таким id: " + user.getId() + " не найден");
-        checkLogin(user);
-        users.replace(user.getId(), user);
-        log.info("Обновленный объект:" + user);
+        log.info("Входящая объект: " + user);
+        userService.updateUser(user);
+        log.info("Обновленный объект " + user);
         return user;
     }
 
     @GetMapping
     public Collection<User> findAll() {
-        log.info("Возвращаемый массив пользователей: " + users.values());
-        return new ArrayList<>(users.values());
+        Collection<User> users = userService.findAllUsers();
+        log.info("Возвращаемый массив пользователей: " + users);
+        return users;
     }
 
-    private Integer getNextId() {
-        Integer currentMaxId = users.keySet()
-                .stream()
-                .mapToInt(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+    @GetMapping("/{id}")
+    public User findUserById(@PathVariable Integer id) {
+        log.info("Входящий id пользователя: " + id);
+        User user = userService.findUserById(id);
+        log.info("Возвращаемый объект: " + user);
+        return user;
     }
 
-    private void checkLogin(User user) {
-        if (user.getName() == null)
-            user.setName(user.getLogin());
+    @PutMapping("/{id}/friends/{friendId}")
+    public Set<Integer> putFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+
+        log.info("Входящий id пользователя: " + id);
+        log.info("Входящий friendId: " + friendId);
+        Set<Integer> friends = userService.putFriend(id,friendId);
+        log.info("Возвращаемый список друзей: " + friends);
+        return friends;
     }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public User deleteFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+        log.info("Входящий id пользователя: " + id);
+        log.info("Входящий friendId: " + friendId);
+        User user = userService.deleteFriend(id,friendId);
+        log.info("Возвращаемый объект: " + user);
+        return user;
+    }
+
+    @GetMapping("/{id}/friends")
+    public Collection<User> getFriends(@PathVariable Integer id) {
+        log.info("Входящий id пользователя: " + id);
+        Collection<User> users = userService.getFriends(id);
+        log.info("Возвращаемый массив пользователей: " + users);
+        return users;
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public Collection<User> getMutualFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
+        log.info("Входящий id пользователя: " + id);
+        log.info("Входящий otherId: " + otherId);
+        Collection<User> users = userService.getMutualFriends(id,otherId);
+        log.info("Возвращаемый массив пользователей: " + users);
+        return users;
+    }
+
 }
 

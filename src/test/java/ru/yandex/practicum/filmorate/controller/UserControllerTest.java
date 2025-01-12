@@ -8,14 +8,20 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ActiveProfiles;
+import ru.yandex.practicum.filmorate.exception.DuplicatedIdFriendsException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Marker;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.utils.Equals;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 @ActiveProfiles("test")
@@ -24,15 +30,24 @@ class UserControllerTest {
 
     private static final Validator validator;
     private UserController userController;
+    private InMemoryUserStorage inMemoryUserStorage;
 
     static {
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
         validator = validatorFactory.usingContext().getValidator();
     }
 
+    @Bean
+    public Validator validator() {
+        return Validation.buildDefaultValidatorFactory().getValidator();
+    }
+
     @BeforeEach
     public void beforeEach() {
-        userController = new UserController();
+
+        inMemoryUserStorage = new InMemoryUserStorage();
+        UserService userService = new UserService(inMemoryUserStorage);
+        userController = new UserController(userService);
     }
 
     @Test
@@ -185,5 +200,162 @@ class UserControllerTest {
                 "должна быть violation поле birthday и аннотация Past"
         );
     }
+
+    @Test
+    @DisplayName("должен находить пользователя по id")
+    public void shouldFindUserById() {
+        User user = new User();
+        user.setLogin("123df");
+        user.setEmail("12356@mail.ru");
+        user.setBirthday(LocalDate.of(2040, 12,2));
+
+        userController.createUser(user);
+
+        Assertions.assertEquals(user, userController.findUserById(user.getId()),
+                "Пользователь должен находиться по id");
+
+    }
+
+    @Test
+    @DisplayName("не должен находить пользователь с несуществующим id")
+    public void shouldNotFindUserByFakeId() {
+        User user = new User();
+        user.setLogin("123df");
+        user.setEmail("12356@mail.ru");
+        user.setBirthday(LocalDate.of(2040, 12,2));
+
+        userController.createUser(user);
+
+
+        Assertions.assertThrows(NotFoundException.class,() -> userController.findUserById(9999),
+                "пользователь с несуществующим id не должен быть найден");
+    }
+
+
+    @Test
+    @DisplayName("должен корректно добавлять друзей")
+    public void shouldPutFriend() {
+        User user1 = new User();
+        user1.setLogin("123df");
+        user1.setEmail("12356@mail.ru");
+        user1.setBirthday(LocalDate.of(2040, 12,2));
+        userController.createUser(user1);
+
+        User user2 = new User();
+        user2.setLogin("12345df");
+        user2.setEmail("12356454@mail.ru");
+        user2.setBirthday(LocalDate.of(2040, 12,2));
+        userController.createUser(user2);
+
+        userController.putFriend(user1.getId(), user2.getId());
+
+        Assertions.assertTrue(inMemoryUserStorage.isFriends(user1.getId(), user2.getId()),
+                "У пользователя1 должен быть друг пользователь2");
+
+    }
+
+    @Test
+    @DisplayName("не должен добавлять другом несуществующего пользователя")
+    public void shouldNotPutFriend() {
+        User user1 = new User();
+        user1.setLogin("123df");
+        user1.setEmail("12356@mail.ru");
+        user1.setBirthday(LocalDate.of(2040, 12,2));
+        userController.createUser(user1);
+
+        User user2 = new User();
+        user2.setLogin("12345df");
+        user2.setEmail("12356454@mail.ru");
+        user2.setBirthday(LocalDate.of(2040, 12,2));
+        userController.createUser(user2);
+
+        Assertions.assertThrows(NotFoundException.class,() -> userController.putFriend(user1.getId(), 9999),
+                "не должен добавлять другом несуществующего пользователя");
+        Assertions.assertThrows(NotFoundException.class,() -> userController.putFriend(99999, user2.getId()),
+                "не должен добавлять другом несуществующего пользователя");
+    }
+
+    @Test
+    @DisplayName("Должен получать список друзей")
+    public void shouldGetFriends() {
+        User user1 = new User();
+        user1.setLogin("123df");
+        user1.setEmail("12356@mail.ru");
+        user1.setBirthday(LocalDate.of(2040, 12,2));
+        userController.createUser(user1);
+
+        User user2 = new User();
+        user2.setLogin("12345df");
+        user2.setEmail("12356454@mail.ru");
+        user2.setBirthday(LocalDate.of(2040, 12,2));
+        userController.createUser(user2);
+
+        User user3 = new User();
+        user3.setLogin("1234545df");
+        user3.setEmail("123543546454@mail.ru");
+        user3.setBirthday(LocalDate.of(2040, 12,2));
+        userController.createUser(user3);
+
+        userController.putFriend(user1.getId(), user2.getId());
+        userController.putFriend(user2.getId(), user3.getId());
+
+        Assertions.assertTrue(userController.getFriends(user2.getId()).contains(user1),
+                "У пользователя2 должен быть друг пользователь1 в списке друзей");
+        Assertions.assertTrue(userController.getFriends(user2.getId()).contains(user3),
+                "У пользователя2 должен быть друг пользователь3 в списке друзей");
+        Assertions.assertEquals(2, userController.getFriends(user2.getId()).size(),
+                "У пользователя должно быть 2 друга");
+    }
+
+
+    @Test
+    @DisplayName("Должен получать общих друзей")
+    public void shouldGetMutualFriends() {
+
+        List<User> listUsers = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            User user = new User();
+            user.setLogin("123" + i);
+            user.setEmail("12356" + i + "@mail.ru");
+            user.setBirthday(LocalDate.of(2040, 12,2));
+            userController.createUser(user);
+            listUsers.add(user);
+        }
+
+        userController.putFriend(listUsers.get(0).getId(), listUsers.get(1).getId());
+        userController.putFriend(listUsers.get(0).getId(), listUsers.get(2).getId());
+        userController.putFriend(listUsers.get(0).getId(), listUsers.get(3).getId());
+        userController.putFriend(listUsers.get(4).getId(), listUsers.get(2).getId());
+        userController.putFriend(listUsers.get(4).getId(), listUsers.get(3).getId());
+
+
+        Assertions.assertTrue(userController.getMutualFriends(listUsers.get(0).getId(),
+                        listUsers.get(4).getId()).contains(listUsers.get(2)),
+                "У пользователей 0 и 4  должен быть друг пользователь2 в списке общих друзей");
+        Assertions.assertTrue(userController.getMutualFriends(listUsers.get(0).getId(),
+                        listUsers.get(4).getId()).contains(listUsers.get(3)),
+                "У пользователей 0 и 4  должен быть друг пользователь3 в списке общих друзей");
+        Assertions.assertFalse(userController.getMutualFriends(listUsers.get(0).getId(),
+                listUsers.get(4).getId()).contains(listUsers.get(1)),
+                "У пользователей 0 и 4  не должен быть друг пользователь1 в списке общих друзей");
+        Assertions.assertEquals(2, userController.getMutualFriends(listUsers.get(0).getId(),
+                        listUsers.get(4).getId()).size(),
+                "У пользователей должно быть 2 общих друга");
+    }
+
+    @Test
+    @DisplayName("пользователь не должен добавлять другом самого себя")
+    public void shouldNotPutFriendHimself() {
+        User user1 = new User();
+        user1.setLogin("123df");
+        user1.setEmail("12356@mail.ru");
+        user1.setBirthday(LocalDate.of(2040, 12,2));
+        userController.createUser(user1);
+
+        Assertions.assertThrows(DuplicatedIdFriendsException.class,
+                () -> userController.putFriend(user1.getId(), user1.getId()),
+                "пользователь не должен добавлять другом самого себя");
+    }
+
 
 }

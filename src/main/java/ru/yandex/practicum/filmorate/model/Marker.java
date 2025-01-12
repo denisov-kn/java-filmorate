@@ -4,4 +4,6 @@ public interface Marker {
     interface Create {}
 
     interface Update {}
+
+    interface Put {}
 }
