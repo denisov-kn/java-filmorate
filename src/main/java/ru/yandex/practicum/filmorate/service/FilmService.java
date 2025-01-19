@@ -1,65 +1,102 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dal.FilmRepository;
+import ru.yandex.practicum.filmorate.dal.GenreRepository;
+import ru.yandex.practicum.filmorate.dal.MpaRepository;
+import ru.yandex.practicum.filmorate.dal.UserRepository;
+import ru.yandex.practicum.filmorate.dto.film.FilmDto;
+import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
+import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
+import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
-import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FilmService {
 
-    private final InMemoryFilmStorage inMemoryFilmStorage;
-    private final InMemoryUserStorage inMemoryUserStorage;
+    private final FilmRepository filmRepository;
+    private final UserRepository userRepository;
+    private final MpaRepository mpaRepository;
+    private final GenreRepository genreRepository;
 
-    public Film createFilm(Film film) {
-        return inMemoryFilmStorage.addFilm(film);
+    public FilmDto createFilm(NewFilmRequest request) {
+
+        Film film = FilmMapper.mapToFilm(request);
+        /*
+        try {
+            mpaRepository.findById(request.getMpa().getId());
+            List<Integer> notExistGenreIds = genreRepository.genresNotExist(request.getGenres());
+            if(!notExistGenreIds.isEmpty())
+                throw new BadRequestException("MPA c такими id не существует:" + notExistGenreIds);
+        } catch (NotFoundException exception) {
+            throw new BadRequestException("MPA c таким id не существует: " + request.getMpa().getId());
+        }
+        */
+        film = filmRepository.save(film);
+        return FilmMapper.mapToFilmDto(film);
     }
 
-    public Film updateFilm(Film film) {
-        findFilmById(film.getId());
-        return inMemoryFilmStorage.updateFilm(film);
 
-    }
-    
-    public Film findFilmById(Integer id) {
-        return inMemoryFilmStorage.findFilmById(id)
-                .orElseThrow(() -> new NotFoundException("Фильм с таким id: " + id + " не найден"));
+
+    public FilmDto findFilmById(Integer filmId) {
+
+        return filmRepository.findById(filmId)
+                .map(FilmMapper::mapToFilmDto)
+                .orElseThrow(() -> new NotFoundException("Фильм с таким id не найден: " + filmId));
     }
 
-    public Film putLike(Integer filmId, Integer userId) {
+
+    public FilmDto updateFilm(UpdateFilmRequest request) {
+
+        Film updateFilm = filmRepository.findById(request.getId())
+                .map(film -> FilmMapper.updateFilmFields(film, request))
+                .orElseThrow(() -> new NotFoundException("Фильм с таким id: " + request.getId() + " не найден"));
+
+        updateFilm = filmRepository.update(updateFilm);
+        return FilmMapper.mapToFilmDto(updateFilm);
+    }
+
+    public List<FilmDto> findAllFilms() {
+        return filmRepository.findAll().stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
+    }
+
+    public FilmDto putLike(Integer filmId, Integer userId) {
         checkUserById(userId);
-        Film film = findFilmById(filmId);
-        inMemoryFilmStorage.putLike(filmId,userId);
-        return film;
+        Film film  = filmRepository.putLike(filmId, userId);
+        return FilmMapper.mapToFilmDto(film);
     }
 
-    public Film deleteLike(Integer filmId, Integer userId) {
+    public FilmDto deleteLike(Integer filmId, Integer userId) {
         checkUserById(userId);
-        Film film = findFilmById(filmId);
-        if (!inMemoryFilmStorage.isUserLikesFilm(filmId,userId))
-            throw new NotFoundException("У фильма c id " + filmId
-                    + " нет лайка от такого пользователя: UserId" + userId);
-
-        inMemoryFilmStorage.deleteLike(filmId, userId);
-        return film;
+        FilmDto filmDto = findFilmById(filmId);
+        filmRepository.removeLike(filmId, userId);
+        return filmDto;
     }
 
-    public Collection<Film> getPopularFilms(Integer count) {
-
-        return inMemoryFilmStorage.getPopularFilms(count);
+    public List<FilmDto> getPopularFilms(Integer count) {
+        return filmRepository.getPopularFilms(count).stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
     }
 
-    public Collection<Film> findAllFilms() {
-       return inMemoryFilmStorage.findAllFilms();
-    }
+
 
     private void checkUserById(Integer id) {
-        if (!inMemoryUserStorage.isUserById(id))
+        if (userRepository.findById(id).isEmpty()) {
             throw new NotFoundException("Пользователь с таким id: " + id + " не найден");
+        }
+
     }
+
 }

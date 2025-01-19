@@ -5,7 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.Marker;
+import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
+import ru.yandex.practicum.filmorate.dto.user.UpdateUserRequest;
+import ru.yandex.practicum.filmorate.dto.user.UserDto;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -20,73 +22,74 @@ public class UserController {
 
     private final UserService userService;
 
-    @Validated(Marker.Create.class)
+    @Validated
     @PostMapping
-    public User createUser(@Valid @RequestBody User user) {
-        log.info("Входящая объект: " + user);
-        userService.addUser(user);
-        log.info("Созданный объект " + user);
-        return user;
+    public UserDto createUser(@Valid @RequestBody NewUserRequest request) {
+        log.info("Входящая объект: " + request);
+        UserDto userDto = userService.addUser(request);
+        log.info("Созданный объект " + userDto);
+        return userDto;
     }
 
-    @Validated(Marker.Update.class)
+    @Validated
     @PutMapping
-    public User updateUser(@Valid @RequestBody User user) {
-        log.info("Входящая объект: " + user);
-        userService.updateUser(user);
-        log.info("Обновленный объект " + user);
-        return user;
+    public UserDto updateUser(@Valid @RequestBody UpdateUserRequest request) {
+        log.info("Входящая объект: " + request);
+        UserDto userDto = userService.updateUser(request);
+        log.info("Обновленный объект " + userDto);
+        return userDto;
     }
 
     @GetMapping
-    public Collection<User> findAll() {
-        Collection<User> users = userService.findAllUsers();
+    public List<UserDto> findAll() {
+        List<UserDto> users = userService.findAllUsers();
         log.info("Возвращаемый массив пользователей: " + users);
         return users;
     }
 
     @GetMapping("/{id}")
-    public User findUserById(@PathVariable Integer id) {
+    public UserDto findUserById(@PathVariable Integer id) {
         log.info("Входящий id пользователя: " + id);
-        User user = userService.findUserById(id);
-        log.info("Возвращаемый объект: " + user);
-        return user;
+        UserDto userDto = userService.findUserById(id);
+        log.info("Возвращаемый объект: " + userDto);
+        return userDto;
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public Set<Integer> putFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+    public List<UserDto> putFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
 
         log.info("Входящий id пользователя: " + id);
         log.info("Входящий friendId: " + friendId);
-        Set<Integer> friends = userService.putFriend(id,friendId);
+        List<UserDto> friends = userService.putFriend(id,friendId);
         log.info("Возвращаемый список друзей: " + friends);
         return friends;
     }
 
+
     @DeleteMapping("/{id}/friends/{friendId}")
-    public User deleteFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+    public UserDto deleteFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
         log.info("Входящий id пользователя: " + id);
         log.info("Входящий friendId: " + friendId);
-        User user = userService.deleteFriend(id,friendId);
-        log.info("Возвращаемый объект: " + user);
-        return user;
+        UserDto userDto = userService.deleteFriend(id,friendId);
+        log.info("Возвращаемый объект: " + userDto);
+        return userDto;
     }
 
     @GetMapping("/{id}/friends")
-    public Collection<User> getFriends(@PathVariable Integer id) {
+    public List<UserDto> getFriends(@PathVariable Integer id) {
         log.info("Входящий id пользователя: " + id);
-        Collection<User> users = userService.getFriends(id);
-        log.info("Возвращаемый массив пользователей: " + users);
-        return users;
+        List<UserDto> usersDto = userService.getFriends(id);
+        log.info("Возвращаемый массив пользователей: " + usersDto);
+        return usersDto;
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public Collection<User> getMutualFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
+    public List<UserDto> getMutualFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         log.info("Входящий id пользователя: " + id);
         log.info("Входящий otherId: " + otherId);
-        Collection<User> users = userService.getMutualFriends(id,otherId);
-        log.info("Возвращаемый массив пользователей: " + users);
-        return users;
+        List<UserDto> usersDto = userService.getMutualFriends(id,otherId);
+        log.info("Возвращаемый массив пользователей: " + usersDto);
+        return usersDto;
     }
 
 }

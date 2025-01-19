@@ -5,11 +5,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Marker;
+import ru.yandex.practicum.filmorate.dto.film.FilmDto;
+import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
+import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.service.FilmService;
-
-import java.util.Collection;
+import java.util.List;
 
 @Slf4j
 @Validated
@@ -21,62 +21,62 @@ public class FilmController {
     private final FilmService filmService;
 
 
-    @Validated(Marker.Create.class)
+    @Validated
     @PostMapping
-    public Film createFilm(@RequestBody @Valid  Film film) {
-        log.info("Входящая объект: " + film);
-        filmService.createFilm(film);
-        log.info("Созданный объект " + film);
-        return film;
+    public FilmDto createFilm(@RequestBody @Valid NewFilmRequest request) {
+        log.info("Входящая объект: " + request);
+        FilmDto filmDto =  filmService.createFilm(request);
+        log.info("Созданный объект " + filmDto);
+        return filmDto;
     }
 
-    @Validated(Marker.Update.class)
+    @Validated
     @PutMapping
-    public Film updateFilm(@RequestBody @Valid Film film) {
-        log.info("Входящая объект: " + film);
-        filmService.updateFilm(film);
-        log.info("Обновленный объект: " + film);
-        return film;
+    public FilmDto updateFilm(@RequestBody @Valid UpdateFilmRequest request) {
+        log.info("Входящая объект: " + request);
+        FilmDto filmDto = filmService.updateFilm(request);
+        log.info("Обновленный объект: " + filmDto);
+        return filmDto;
     }
 
     @GetMapping
-    public Collection<Film> findAll() {
-        Collection<Film> films = filmService.findAllFilms();
+    public List<FilmDto> findAll() {
+        List<FilmDto> films = filmService.findAllFilms();
         log.info("Возвращаемый массив фильмов: " + films);
         return films;
     }
 
     @GetMapping ("/{id}")
-    public Film getFilmById(@PathVariable Integer id) {
+    public FilmDto getFilmById(@PathVariable Integer id) {
         log.info("Входящая id: " + id);
-        Film film = filmService.findFilmById(id);
-        log.info("Возвращаемы объект: " + film);
-        return film;
+        FilmDto filmDto = filmService.findFilmById(id);
+        log.info("Возвращаемы объект: " + filmDto);
+        return filmDto;
     }
 
     @PutMapping ("/{id}/like/{userId}")
-    public Film putLike(@PathVariable Integer id, @PathVariable Integer userId) {
+    public FilmDto putLike(@PathVariable Integer id, @PathVariable Integer userId) {
         log.info("Входящий id фильма: " + id);
         log.info("Входящий userId: " + userId);
-        Film film = filmService.putLike(id, userId);
-        log.info("Возвращаемы объект: " + film);
-        return film;
+        FilmDto filmDto = filmService.putLike(id, userId);
+        log.info("Возвращаемы объект: " + filmDto);
+        return filmDto;
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public Film deleteLike(@PathVariable Integer id, @PathVariable Integer userId) {
+    public FilmDto deleteLike(@PathVariable Integer id, @PathVariable Integer userId) {
         log.info("Входящий id фильма: " + id);
         log.info("Входящий userId: " + userId);
-        Film film = filmService.deleteLike(id, userId);
-        log.info("Возвращаемы объект: " + film);
-        return film;
+        FilmDto filmDto = filmService.deleteLike(id, userId);
+        log.info("Возвращаемы объект: " + filmDto);
+        return filmDto;
     }
 
     @GetMapping("/popular")
-    public Collection<Film> getPopularFilms(@RequestParam(defaultValue = "10") final Integer count) {
+    public List<FilmDto> getPopularFilms(@RequestParam(defaultValue = "10") final Integer count) {
         log.info("Входящий count: " + count);
-        Collection<Film> films = filmService.getPopularFilms(count);
-        log.info("Возвращаемый массив фильмов: " + films);
-        return films;
+        List<FilmDto> filmsDto = filmService.getPopularFilms(count);
+        log.info("Возвращаемый массив фильмов: " + filmsDto);
+        return filmsDto;
     }
 }

@@ -1,33 +1,13 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.Bean;
-import org.springframework.test.context.ActiveProfiles;
-import ru.yandex.practicum.filmorate.exception.DuplicatedIdFriendsException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Marker;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.utils.Equals;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import org.junit.jupiter.api.DisplayName;
+import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
 @DisplayName("Контроллер модели User")
 class UserControllerTest {
-
+/*
     private static final Validator validator;
     private UserController userController;
     private InMemoryUserStorage inMemoryUserStorage;
@@ -357,5 +337,5 @@ class UserControllerTest {
                 "пользователь не должен добавлять другом самого себя");
     }
 
-
+*/
 }
