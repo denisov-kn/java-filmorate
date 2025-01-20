@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.filmorate.dto.MpaDto;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.MpaService;
 
 import java.util.List;
@@ -21,18 +21,18 @@ public class MpaController {
     private final MpaService mpaService;
 
     @GetMapping("/{id}")
-    public MpaDto getMpa(@PathVariable Integer id) {
+    public Mpa getMpa(@PathVariable Integer id) {
         log.info("Входящий id mpa: " + id);
-        MpaDto mpaDto = mpaService.getMpa(id);
-        log.info("Возвращаемы объект: " + mpaDto);
-        return mpaDto;
+        Mpa mpa = mpaService.getMpa(id);
+        log.info("Возвращаемы объект: " + mpa);
+        return mpa;
     }
 
     @GetMapping
-    public List<MpaDto> getAllMpa() {
-        List<MpaDto> mpaDto = mpaService.getAllMpa();
-        log.info("Возвращаемы объект: " + mpaDto);
-        return mpaDto;
+    public List<Mpa> getAllMpa() {
+        List<Mpa> mpa = mpaService.getAllMpa();
+        log.info("Возвращаемы объект: " + mpa);
+        return mpa;
     }
 
 }
