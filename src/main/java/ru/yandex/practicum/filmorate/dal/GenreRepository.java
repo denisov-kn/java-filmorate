@@ -5,11 +5,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.dto.GenreDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Repository
@@ -35,10 +35,11 @@ public class GenreRepository extends BaseRepository<Genre> {
         return findMany(FIND_ALL);
     }
 
-    public List<Integer> genresNotExist(List<Genre> genres) {
-       List<Integer> genreIds = genres.stream()
+    public Set<Integer> genresNotExist(Set<Genre> genres) {
+
+        Set<Integer> genreIds = genres.stream()
                .map(Genre::getId)
-               .toList();
+               .collect(Collectors.toSet());
 
         String inClause = genreIds.stream()
                .map(id -> "?")
@@ -52,6 +53,6 @@ public class GenreRepository extends BaseRepository<Genre> {
 
         return genreIds.stream()
                 .filter(id -> !findIds.contains(id))
-                .toList();
+                .collect(Collectors.toSet());
     }
 }

@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class IdObject {
-    private int id;
+    private Integer id;
 
     @JsonCreator
     public IdObject(@JsonProperty("id") Integer id) {

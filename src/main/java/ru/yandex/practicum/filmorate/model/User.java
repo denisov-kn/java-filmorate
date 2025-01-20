@@ -24,6 +24,10 @@ public class User {
     @Past (message = "День рождения не может быть в будущем", groups = {Marker.Update.class, Marker.Create.class})
     private LocalDate birthday;
 
+    public boolean hasName() {
+        return name != null;
+    }
+
     @AssertTrue(message = "Логин не может содержать пробелы")
     public boolean isValidateLogin() {
         return !login.matches(".*\\s.*");

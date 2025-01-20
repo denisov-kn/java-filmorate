@@ -7,16 +7,14 @@ import ru.yandex.practicum.filmorate.dal.FilmRepository;
 import ru.yandex.practicum.filmorate.dal.GenreRepository;
 import ru.yandex.practicum.filmorate.dal.MpaRepository;
 import ru.yandex.practicum.filmorate.dal.UserRepository;
-import ru.yandex.practicum.filmorate.dto.film.FilmDto;
-import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
-import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
+
 import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -28,75 +26,64 @@ public class FilmService {
     private final MpaRepository mpaRepository;
     private final GenreRepository genreRepository;
 
-    public FilmDto createFilm(NewFilmRequest request) {
+    public Film createFilm(Film film) {
 
-        Film film = FilmMapper.mapToFilm(request);
-        /*
         try {
-            mpaRepository.findById(request.getMpa().getId());
-            List<Integer> notExistGenreIds = genreRepository.genresNotExist(request.getGenres());
-            if(!notExistGenreIds.isEmpty())
-                throw new BadRequestException("MPA c такими id не существует:" + notExistGenreIds);
+            mpaRepository.findById(film.getMpa().getId());
+            if(film.hasGenres()) {
+                Set<Integer> notExistGenreIds = genreRepository.genresNotExist(film.getGenres());
+                if (!notExistGenreIds.isEmpty())
+                    throw new BadRequestException("Genre c такими id не существует:" + notExistGenreIds);
+            }
         } catch (NotFoundException exception) {
-            throw new BadRequestException("MPA c таким id не существует: " + request.getMpa().getId());
+            throw new BadRequestException("MPA c таким id не существует: " + film.getMpa().getId());
         }
-        */
-        film = filmRepository.save(film);
-        return FilmMapper.mapToFilmDto(film);
+
+        return filmRepository.save(film);
     }
 
 
 
-    public FilmDto findFilmById(Integer filmId) {
+    public Film findFilmById(Integer filmId) {
 
         return filmRepository.findById(filmId)
-                .map(FilmMapper::mapToFilmDto)
                 .orElseThrow(() -> new NotFoundException("Фильм с таким id не найден: " + filmId));
     }
 
 
-    public FilmDto updateFilm(UpdateFilmRequest request) {
+    public Film updateFilm(Film film) {
 
-        Film updateFilm = filmRepository.findById(request.getId())
-                .map(film -> FilmMapper.updateFilmFields(film, request))
-                .orElseThrow(() -> new NotFoundException("Фильм с таким id: " + request.getId() + " не найден"));
+        Film updateFilm = filmRepository.findById(film.getId())
+                .map(film1 -> FilmMapper.updateFilmFields(film1, film))
+                .orElseThrow(() -> new NotFoundException("Фильм с таким id: " + film.getId() + " не найден"));
 
-        updateFilm = filmRepository.update(updateFilm);
-        return FilmMapper.mapToFilmDto(updateFilm);
+        return filmRepository.update(updateFilm);
     }
 
-    public List<FilmDto> findAllFilms() {
-        return filmRepository.findAll().stream()
-                .map(FilmMapper::mapToFilmDto)
-                .collect(Collectors.toList());
+    public List<Film> findAllFilms() {
+        return filmRepository.findAll();
     }
 
-    public FilmDto putLike(Integer filmId, Integer userId) {
+    public Film putLike(Integer filmId, Integer userId) {
         checkUserById(userId);
-        Film film  = filmRepository.putLike(filmId, userId);
-        return FilmMapper.mapToFilmDto(film);
+        return filmRepository.putLike(filmId, userId);
     }
 
-    public FilmDto deleteLike(Integer filmId, Integer userId) {
+    public Film deleteLike(Integer filmId, Integer userId) {
         checkUserById(userId);
-        FilmDto filmDto = findFilmById(filmId);
+        Film film = findFilmById(filmId);
         filmRepository.removeLike(filmId, userId);
-        return filmDto;
+        return film;
     }
 
-    public List<FilmDto> getPopularFilms(Integer count) {
-        return filmRepository.getPopularFilms(count).stream()
-                .map(FilmMapper::mapToFilmDto)
-                .collect(Collectors.toList());
+    public List<Film> getPopularFilms(Integer count) {
+        return filmRepository.getPopularFilms(count);
     }
-
-
 
     private void checkUserById(Integer id) {
         if (userRepository.findById(id).isEmpty()) {
             throw new NotFoundException("Пользователь с таким id: " + id + " не найден");
         }
-
     }
 
 }

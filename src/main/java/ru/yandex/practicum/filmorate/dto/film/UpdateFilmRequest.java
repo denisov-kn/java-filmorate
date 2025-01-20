@@ -4,7 +4,6 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.model.DateFormat;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.IdObject;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.time.LocalDate;

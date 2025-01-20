@@ -3,17 +3,13 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dal.UserRepository;
-import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
-import ru.yandex.practicum.filmorate.dto.user.UpdateUserRequest;
-import ru.yandex.practicum.filmorate.dto.user.UserDto;
 import ru.yandex.practicum.filmorate.exception.DuplicatedIdFriendsException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -22,45 +18,39 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public UserDto addUser(NewUserRequest request) {
+    public User addUser(User user) {
 
-        if (request.getName() == null)
-            request.setName(request.getLogin());
+        if (user.getName() == null)
+            user.setName(user.getLogin());
 
-        User user = UserMapper.mapToUser(request);
-        user = userRepository.save(user);
-        return UserMapper.mapToUserDto(user);
+        return userRepository.save(user);
     }
 
-    public UserDto updateUser(UpdateUserRequest request) {
-        checkUserById(request.getId());
+    public User updateUser(User user) {
+        checkUserById(user.getId());
 
-        if (request.getName() == null)
-            request.setName(request.getLogin());
+        if (user.getName() == null)
+            user.setName(user.getLogin());
 
-        User updateUser = userRepository.findById(request.getId())
-                .map(user -> UserMapper.updateUserFields(user, request))
-                .orElseThrow(() -> new NotFoundException("User с таким id: " + request.getId() + " не найден"));
+        User updateUser = userRepository.findById(user.getId())
+                .map(user1 -> UserMapper.updateUserFields(user1, user))
+                .orElseThrow(() -> new NotFoundException("User с таким id: " + user.getId() + " не найден"));
 
-        updateUser = userRepository.update(updateUser);
-        return UserMapper.mapToUserDto(updateUser);
+        return userRepository.update(updateUser);
     }
 
-    public List<UserDto> findAllUsers() {
-        return userRepository.findAll().stream()
-                .map(UserMapper::mapToUserDto)
-                .collect(Collectors.toList());
+    public List<User> findAllUsers() {
+        return new ArrayList<>(userRepository.findAll());
     }
 
-    public UserDto findUserById(Integer id) {
+    public User findUserById(Integer id) {
         return userRepository.findById(id)
-                .map(UserMapper::mapToUserDto)
                 .orElseThrow(() -> new NotFoundException("Пользователь с таким id: " + id + " не найден"));
 
     }
 
 
-    public List<UserDto> putFriend(Integer userId, Integer friendId) {
+    public List<User> putFriend(Integer userId, Integer friendId) {
 
         if (userId.equals(friendId)) {
             throw new DuplicatedIdFriendsException("Нельзя добавить пользователя другом самому себе id: "
@@ -68,33 +58,29 @@ public class UserService {
         }
         checkUserById(userId);
         checkUserById(friendId);
-        return userRepository.putFriends(userId, friendId).stream()
-                .map(UserMapper::mapToUserDto)
-                .collect(Collectors.toList());
+        return userRepository.putFriends(userId, friendId);
     }
 
-    public UserDto deleteFriend(Integer userId, Integer friendId) {
-        UserDto userDto = findUserById(userId);
+    public User deleteFriend(Integer userId, Integer friendId) {
+        User user = findUserById(userId);
         checkUserById(friendId);
         if (userRepository.isFriends(userId, friendId)) {
             userRepository.removeFriends(userId, friendId);
         }
-        return userDto;
+        return user;
     }
 
-    public List<UserDto> getFriends(Integer userId) {
+    public List<User> getFriends(Integer userId) {
         checkUserById(userId);
-        return userRepository.findFriends(userId).stream()
-                .map(UserMapper::mapToUserDto)
-                .collect(Collectors.toList());
+        return userRepository.findFriends(userId);
+
     }
 
-    public List<UserDto> getMutualFriends(Integer userId, Integer otherId) {
+    public List<User> getMutualFriends(Integer userId, Integer otherId) {
         checkUserById(userId);
         checkUserById(otherId);
-        return userRepository.getMutualFriends(userId, otherId).stream()
-                .map(UserMapper::mapToUserDto)
-                .collect(Collectors.toList());
+        return userRepository.getMutualFriends(userId, otherId);
+
 
     }
 

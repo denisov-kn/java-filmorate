@@ -59,10 +59,4 @@ public class BaseRepository<T> {
         }
     }
 
-    protected List<T> findManyParameter(String query, MapSqlParameterSource parameterSource) {
-        return jdbc.query(query, mapper, parameterSource);
-    }
-
-
-
 }

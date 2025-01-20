@@ -1,23 +1,22 @@
 package ru.yandex.practicum.filmorate.mapper;
-
-import ru.yandex.practicum.filmorate.dto.film.FilmDto;
-import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
-import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.model.Film;
 
 
 public class FilmMapper {
 
-    public static Film mapToFilm(NewFilmRequest request) {
+    /*
+
+    public static Film mapToFilm(Film film1) {
         Film film = new Film();
-        film.setMpa(request.getMpa());
-        film.setName(request.getName());
-        film.setReleaseDate(request.getReleaseDate());
-        film.setDuration(request.getDuration());
-        film.setGenres(request.getGenres());
-        film.setDescription(request.getDescription());
+        film.setMpa(film1.getMpa());
+        film.setName(film1.getName());
+        film.setReleaseDate(film1.getReleaseDate());
+        film.setDuration(film1.getDuration());
+        film.setGenres(film1.getGenres());
+        film.setDescription(film1.getDescription());
         return film;
     }
+
 
     public static FilmDto mapToFilmDto(Film film) {
         FilmDto filmDto = new FilmDto();
@@ -31,21 +30,21 @@ public class FilmMapper {
         return  filmDto;
     }
 
-
-    public static Film updateFilmFields(Film film, UpdateFilmRequest request) {
-        film.setName(request.getName());
-        film.setReleaseDate(request.getReleaseDate());
-        film.setDuration(request.getDuration());
-        if (request.hasGenres()) {
-            film.setGenres(request.getGenres());
+*/
+    public static Film updateFilmFields(Film film, Film newFilm) {
+        film.setName(newFilm.getName());
+        film.setReleaseDate(newFilm.getReleaseDate());
+        film.setDuration(newFilm.getDuration());
+        if (newFilm.hasGenres()) {
+            film.setGenres(newFilm.getGenres());
         }
 
-        if (request.hasDescription()) {
-            film.setDescription(request.getDescription());
+        if (newFilm.hasDescription()) {
+            film.setDescription(newFilm.getDescription());
         }
 
-        if (request.hasMpa()) {
-            film.setMpa(request.getMpa());
+        if (newFilm.hasMpa()) {
+            film.setMpa(newFilm.getMpa());
         }
         return film;
     }

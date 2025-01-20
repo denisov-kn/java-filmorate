@@ -16,14 +16,12 @@ public class GenreService {
 
     private final GenreRepository genreRepository;
 
-    public List<GenreDto> getAllGenres() {
-        return genreRepository.findAll().stream()
-                .map(GenreMapper::genreToDto)
-                .collect(Collectors.toList());
+    public List<Genre> getAllGenres() {
+        return genreRepository.findAll();
+
     }
 
-    public GenreDto getGenreById(int id) {
-        Genre genre = genreRepository.findById(id);
-        return GenreMapper.genreToDto(genre);
+    public Genre getGenreById(int id) {
+        return genreRepository.findById(id);
     }
 }
