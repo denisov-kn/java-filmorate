@@ -1,4 +1,5 @@
 package ru.yandex.practicum.filmorate.controller;
+
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.Assertions;
@@ -15,13 +16,10 @@ import ru.yandex.practicum.filmorate.model.Marker;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.utils.Equals;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-
 
 @SpringBootTest
 @ActiveProfiles("test")

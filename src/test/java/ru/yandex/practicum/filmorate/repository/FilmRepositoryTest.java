@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.repository;
 
-import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -14,16 +13,12 @@ import ru.yandex.practicum.filmorate.dal.UserRepository;
 import ru.yandex.practicum.filmorate.dal.mappers.FilmRowMapper;
 import ru.yandex.practicum.filmorate.dal.mappers.UserRowMapper;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.utils.Equals;
-
 import java.time.LocalDate;
 import java.util.*;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.map;
 
 @JdbcTest
 @AutoConfigureTestDatabase
@@ -38,7 +33,7 @@ public class FilmRepositoryTest {
     static Film getFilm() {
         Film film = new Film();
         film.setName("testFilmName" + UUID.randomUUID());
-        film.setDuration((int) (Math.random()*100) + 1);
+        film.setDuration((int)(Math.random() * 100) + 1);
         film.setReleaseDate(LocalDate.of(2010,1,1));
         Mpa mpa = new Mpa();
         mpa.setId(1);

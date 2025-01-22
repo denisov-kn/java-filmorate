@@ -1,7 +1,5 @@
 package ru.yandex.practicum.filmorate.dal;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
@@ -10,7 +8,6 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -143,22 +140,22 @@ public class FilmRepository extends BaseRepository<Film> {
 
     public Film putLike(Integer filmId, Integer userId) {
 
-        MapSqlParameterSource mapPutLike= new MapSqlParameterSource();
+        MapSqlParameterSource mapPutLike = new MapSqlParameterSource();
         mapPutLike.addValue("filmId", filmId);
         mapPutLike.addValue("userId", userId);
 
         insert(INSET_LIKES, mapPutLike, "LIKE_ID");
-      return findById(filmId).orElseThrow(()-> new NotFoundException( "Film not found" ));
+      return findById(filmId).orElseThrow(() -> new NotFoundException("Film not found"));
     }
 
     public Film removeLike(Integer filmId, Integer userId) {
 
-        MapSqlParameterSource deletePutLike= new MapSqlParameterSource();
+        MapSqlParameterSource deletePutLike = new MapSqlParameterSource();
         deletePutLike.addValue("filmId", filmId);
         deletePutLike.addValue("userId", userId);
 
         update(DELETE_LIKES, deletePutLike);
-        return findById(filmId).orElseThrow(()-> new NotFoundException( "Film not found" ));
+        return findById(filmId).orElseThrow(() -> new NotFoundException("Film not found"));
     }
 
     public List<Film> getPopularFilms(Integer count) {

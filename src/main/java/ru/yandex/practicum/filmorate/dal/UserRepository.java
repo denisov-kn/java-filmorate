@@ -79,7 +79,7 @@ public class UserRepository extends BaseRepository<User> {
         params.addValue("friendUserId", friendsId);
         update(DELETE_FRIENDS, params);
 
-       return findById(userId).orElseThrow(()->new NotFoundException("User not found"));
+       return findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
     }
 
 

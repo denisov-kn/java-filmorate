@@ -79,7 +79,7 @@ public class ErrorHandlingControllerAdvice {
     @ExceptionHandler(BadRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ErrorResponse onBadRequestException( final BadRequestException e) {
+    public ErrorResponse onBadRequestException(final BadRequestException e) {
         return new ErrorResponse(
                 e.getMessage()
         );

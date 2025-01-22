@@ -29,10 +29,10 @@ public class FilmService {
     public Film createFilm(Film film) {
 
         try {
-            if(film.hasMpa()) {
+            if (film.hasMpa()) {
                 mpaRepository.findById(film.getMpa().getId());
             }
-            if(film.hasGenres()) {
+            if (film.hasGenres()) {
                 Set<Integer> notExistGenreIds = genreRepository.genresNotExist(film.getGenres());
                 if (!notExistGenreIds.isEmpty())
                     throw new BadRequestException("Genre c такими id не существует:" + notExistGenreIds);

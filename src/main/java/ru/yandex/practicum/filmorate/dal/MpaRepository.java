@@ -28,7 +28,7 @@ public class MpaRepository extends BaseRepository<Mpa> {
     public Mpa findById(int id) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("mpaId", id);
-        return findOne(FIND_BY_ID, params).orElseThrow(()-> new NotFoundException("MPA с таким id нет: " + id));
+        return findOne(FIND_BY_ID, params).orElseThrow(() -> new NotFoundException("MPA с таким id нет: " + id));
     }
 
 
