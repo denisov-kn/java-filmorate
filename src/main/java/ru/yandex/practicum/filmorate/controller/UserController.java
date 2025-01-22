@@ -24,23 +24,23 @@ public class UserController {
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
         log.info("Входящая объект: " + user);
-        userService.addUser(user);
-        log.info("Созданный объект " + user);
-        return user;
+        User userNew = userService.addUser(user);
+        log.info("Созданный объект " + userNew);
+        return userNew;
     }
 
     @Validated(Marker.Update.class)
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
         log.info("Входящая объект: " + user);
-        userService.updateUser(user);
-        log.info("Обновленный объект " + user);
-        return user;
+        User userUpdate = userService.updateUser(user);
+        log.info("Обновленный объект " + userUpdate);
+        return userUpdate;
     }
 
     @GetMapping
-    public Collection<User> findAll() {
-        Collection<User> users = userService.findAllUsers();
+    public List<User> findAll() {
+        List<User> users = userService.findAllUsers();
         log.info("Возвращаемый массив пользователей: " + users);
         return users;
     }
@@ -54,14 +54,15 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public Set<Integer> putFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+    public List<User> putFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
 
         log.info("Входящий id пользователя: " + id);
         log.info("Входящий friendId: " + friendId);
-        Set<Integer> friends = userService.putFriend(id,friendId);
+        List<User> friends = userService.putFriend(id,friendId);
         log.info("Возвращаемый список друзей: " + friends);
         return friends;
     }
+
 
     @DeleteMapping("/{id}/friends/{friendId}")
     public User deleteFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
@@ -73,18 +74,18 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    public Collection<User> getFriends(@PathVariable Integer id) {
+    public List<User> getFriends(@PathVariable Integer id) {
         log.info("Входящий id пользователя: " + id);
-        Collection<User> users = userService.getFriends(id);
+        List<User> users = userService.getFriends(id);
         log.info("Возвращаемый массив пользователей: " + users);
         return users;
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public Collection<User> getMutualFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
+    public List<User> getMutualFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         log.info("Входящий id пользователя: " + id);
         log.info("Входящий otherId: " + otherId);
-        Collection<User> users = userService.getMutualFriends(id,otherId);
+        List<User> users = userService.getMutualFriends(id,otherId);
         log.info("Возвращаемый массив пользователей: " + users);
         return users;
     }

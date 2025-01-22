@@ -8,8 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Marker;
 import ru.yandex.practicum.filmorate.service.FilmService;
-
-import java.util.Collection;
+import java.util.List;
 
 @Slf4j
 @Validated
@@ -23,25 +22,25 @@ public class FilmController {
 
     @Validated(Marker.Create.class)
     @PostMapping
-    public Film createFilm(@RequestBody @Valid  Film film) {
+    public Film createFilm(@RequestBody @Valid Film film) {
         log.info("Входящая объект: " + film);
-        filmService.createFilm(film);
-        log.info("Созданный объект " + film);
-        return film;
+        Film  filmOut = filmService.createFilm(film);
+        log.info("Созданный объект " + filmOut);
+        return filmOut;
     }
 
     @Validated(Marker.Update.class)
     @PutMapping
     public Film updateFilm(@RequestBody @Valid Film film) {
         log.info("Входящая объект: " + film);
-        filmService.updateFilm(film);
-        log.info("Обновленный объект: " + film);
-        return film;
+        Film filmOut = filmService.updateFilm(film);
+        log.info("Обновленный объект: " + filmOut);
+        return filmOut;
     }
 
     @GetMapping
-    public Collection<Film> findAll() {
-        Collection<Film> films = filmService.findAllFilms();
+    public List<Film> findAll() {
+        List<Film> films = filmService.findAllFilms();
         log.info("Возвращаемый массив фильмов: " + films);
         return films;
     }
@@ -73,9 +72,9 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public Collection<Film> getPopularFilms(@RequestParam(defaultValue = "10") final Integer count) {
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") final Integer count) {
         log.info("Входящий count: " + count);
-        Collection<Film> films = filmService.getPopularFilms(count);
+        List<Film> films = filmService.getPopularFilms(count);
         log.info("Возвращаемый массив фильмов: " + films);
         return films;
     }

@@ -1,21 +1,20 @@
 package ru.yandex.practicum.filmorate.controller;
 
+
 import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
 import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.filmorate.dal.UserRepository;
 import ru.yandex.practicum.filmorate.exception.DuplicatedIdFriendsException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Marker;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.utils.Equals;
 
 import java.time.LocalDate;
@@ -24,31 +23,22 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+@SpringBootTest
 @ActiveProfiles("test")
+@Transactional
 @DisplayName("Контроллер модели User")
 class UserControllerTest {
 
-    private static final Validator validator;
+    @Autowired
+    private  Validator validator;
+
+    @Autowired
     private UserController userController;
-    private InMemoryUserStorage inMemoryUserStorage;
 
-    static {
-        ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
-        validator = validatorFactory.usingContext().getValidator();
-    }
+    @Autowired
+    private UserRepository userRepository;
 
-    @Bean
-    public Validator validator() {
-        return Validation.buildDefaultValidatorFactory().getValidator();
-    }
 
-    @BeforeEach
-    public void beforeEach() {
-
-        inMemoryUserStorage = new InMemoryUserStorage();
-        UserService userService = new UserService(inMemoryUserStorage);
-        userController = new UserController(userService);
-    }
 
     @Test
     @DisplayName("должен создавать пользователя")
@@ -68,14 +58,17 @@ class UserControllerTest {
         User user1 = new User();
         user1.setEmail("123@mail.ru");
         user1.setLogin("123df");
+        user1.setBirthday(LocalDate.of(2000,1,1));
         User user2 = new User();
         user2.setEmail("456@mail.ru");
         user2.setLogin("567df");
+        user2.setBirthday(LocalDate.of(2000,1,1));
 
         userController.createUser(user1);
         userController.createUser(user2);
 
         Collection<User> users = userController.findAll();
+        System.out.println(users);
         Assertions.assertEquals(2, users.size(),"в памяти должно быть 2 пользователя");
     }
 
@@ -85,11 +78,13 @@ class UserControllerTest {
         User user1 = new User();
         user1.setEmail("123@mail.ru");
         user1.setLogin("123df");
+        user1.setBirthday(LocalDate.of(2000,1,1));
         userController.createUser(user1);
         User user2 = new User();
         user2.setEmail("456@mail.ru");
         user2.setLogin("567df");
         user2.setId(99);
+        user2.setBirthday(LocalDate.of(2000,1,1));
         Assertions.assertThrows(NotFoundException.class,() -> userController.updateUser(user2),
                 "пользователь с несуществующим id не должен обновляться");
     }
@@ -103,10 +98,10 @@ class UserControllerTest {
         user1.setName("vik");
         user1.setBirthday(LocalDate.of(1986,2,15));
 
-        userController.createUser(user1);
+        Integer id = userController.createUser(user1).getId();
 
         User user2 = new User();
-        user2.setId(1);
+        user2.setId(id);
         user2.setEmail("12356@mail.ru");
         user2.setLogin("123565df");
         user2.setName("vik34");
@@ -207,7 +202,7 @@ class UserControllerTest {
         User user = new User();
         user.setLogin("123df");
         user.setEmail("12356@mail.ru");
-        user.setBirthday(LocalDate.of(2040, 12,2));
+        user.setBirthday(LocalDate.of(2015, 12,2));
 
         userController.createUser(user);
 
@@ -222,7 +217,7 @@ class UserControllerTest {
         User user = new User();
         user.setLogin("123df");
         user.setEmail("12356@mail.ru");
-        user.setBirthday(LocalDate.of(2040, 12,2));
+        user.setBirthday(LocalDate.of(2005, 12,2));
 
         userController.createUser(user);
 
@@ -238,18 +233,18 @@ class UserControllerTest {
         User user1 = new User();
         user1.setLogin("123df");
         user1.setEmail("12356@mail.ru");
-        user1.setBirthday(LocalDate.of(2040, 12,2));
+        user1.setBirthday(LocalDate.of(2015, 12,2));
         userController.createUser(user1);
 
         User user2 = new User();
         user2.setLogin("12345df");
         user2.setEmail("12356454@mail.ru");
-        user2.setBirthday(LocalDate.of(2040, 12,2));
+        user2.setBirthday(LocalDate.of(2015, 12,2));
         userController.createUser(user2);
 
         userController.putFriend(user1.getId(), user2.getId());
 
-        Assertions.assertTrue(inMemoryUserStorage.isFriends(user1.getId(), user2.getId()),
+        Assertions.assertTrue(userRepository.isFriends(user1.getId(), user2.getId()),
                 "У пользователя1 должен быть друг пользователь2");
 
     }
@@ -260,13 +255,13 @@ class UserControllerTest {
         User user1 = new User();
         user1.setLogin("123df");
         user1.setEmail("12356@mail.ru");
-        user1.setBirthday(LocalDate.of(2040, 12,2));
+        user1.setBirthday(LocalDate.of(2015, 12,2));
         userController.createUser(user1);
 
         User user2 = new User();
         user2.setLogin("12345df");
         user2.setEmail("12356454@mail.ru");
-        user2.setBirthday(LocalDate.of(2040, 12,2));
+        user2.setBirthday(LocalDate.of(2015, 12,2));
         userController.createUser(user2);
 
         Assertions.assertThrows(NotFoundException.class,() -> userController.putFriend(user1.getId(), 9999),
@@ -281,22 +276,22 @@ class UserControllerTest {
         User user1 = new User();
         user1.setLogin("123df");
         user1.setEmail("12356@mail.ru");
-        user1.setBirthday(LocalDate.of(2040, 12,2));
+        user1.setBirthday(LocalDate.of(2015, 12,2));
         userController.createUser(user1);
 
         User user2 = new User();
         user2.setLogin("12345df");
         user2.setEmail("12356454@mail.ru");
-        user2.setBirthday(LocalDate.of(2040, 12,2));
+        user2.setBirthday(LocalDate.of(2015, 12,2));
         userController.createUser(user2);
 
         User user3 = new User();
         user3.setLogin("1234545df");
         user3.setEmail("123543546454@mail.ru");
-        user3.setBirthday(LocalDate.of(2040, 12,2));
+        user3.setBirthday(LocalDate.of(2015, 12,2));
         userController.createUser(user3);
 
-        userController.putFriend(user1.getId(), user2.getId());
+        userController.putFriend(user2.getId(), user1.getId());
         userController.putFriend(user2.getId(), user3.getId());
 
         Assertions.assertTrue(userController.getFriends(user2.getId()).contains(user1),
@@ -317,7 +312,7 @@ class UserControllerTest {
             User user = new User();
             user.setLogin("123" + i);
             user.setEmail("12356" + i + "@mail.ru");
-            user.setBirthday(LocalDate.of(2040, 12,2));
+            user.setBirthday(LocalDate.of(2015, 12,2));
             userController.createUser(user);
             listUsers.add(user);
         }
@@ -349,7 +344,7 @@ class UserControllerTest {
         User user1 = new User();
         user1.setLogin("123df");
         user1.setEmail("12356@mail.ru");
-        user1.setBirthday(LocalDate.of(2040, 12,2));
+        user1.setBirthday(LocalDate.of(2012, 12,2));
         userController.createUser(user1);
 
         Assertions.assertThrows(DuplicatedIdFriendsException.class,
