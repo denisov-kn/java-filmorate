@@ -1,38 +1,43 @@
 package ru.yandex.practicum.filmorate.controller;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.filmorate.dal.FilmRepository;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Marker;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.utils.Equals;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 
 
-
-@ActiveProfiles("test")
 @SpringBootTest
+@ActiveProfiles("test")
+@Transactional
 @DisplayName("Контролер модели Film")
 class FilmControllerTest {
-/*
-    private static final Validator validator;
+
+    @Autowired
+    private Validator validator;
+    @Autowired
     private FilmController filmController;
+    @Autowired
     private UserController userController;
-    private InMemoryFilmStorage  inMemoryFilmStorage;
+    @Autowired
+    private FilmRepository filmRepository;
 
-    static {
-        ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
-        validator = validatorFactory.usingContext().getValidator();
-
-
-    }
-
-    @BeforeEach
-    public void beforeEach() {
-        inMemoryFilmStorage = new InMemoryFilmStorage();
-        InMemoryUserStorage inMemoryUserStorage = new InMemoryUserStorage();
-        UserService userService = new UserService(inMemoryUserStorage);
-        FilmService filmService = new FilmService(inMemoryFilmStorage, inMemoryUserStorage);
-        userController = new UserController(userService);
-        filmController = new FilmController(filmService);
-
-    }
 
     @Test
     @DisplayName("должен создавать фильм")
@@ -50,12 +55,19 @@ class FilmControllerTest {
     public void shouldGetAllFilms() {
         Film film = new Film();
         film.setName("Фильм1");
+        film.setDuration(100);
+        film.setReleaseDate(LocalDate.of(2000,1,1));
         Film film2 = new Film();
         film2.setName("Фильм2");
-        filmController.createFilm(film);
-        filmController.createFilm(film2);
+        film2.setDuration(100);
+        film2.setReleaseDate(LocalDate.of(2000,1,2));
+        Integer id1 = filmController.createFilm(film).getId();
+        Integer id2 = filmController.createFilm(film2).getId();
+        System.out.println("id1:" + id1);
+        System.out.println("id2:" + id2);
 
-        Collection<Film> films = filmController.findAll();
+        List<Film> films = filmController.findAll();
+        System.out.println("films:" + films);
         Assertions.assertEquals(2, films.size(),"в памяти должно быть 2 фильма");
     }
 
@@ -64,10 +76,14 @@ class FilmControllerTest {
     public void shouldNotUpdateFilmWithFakeId() {
         Film film = new Film();
         film.setName("Фильм1");
+        film.setDuration(100);
+        film.setReleaseDate(LocalDate.of(2000,1,1));
         filmController.createFilm(film);
         Film newFilm = new Film();
         newFilm.setName("Фильм2");
         newFilm.setId(99);
+        newFilm.setDuration(100);
+        newFilm.setReleaseDate(LocalDate.of(2000,1,1));
         Assertions.assertThrows(NotFoundException.class,() -> filmController.updateFilm(newFilm),
                 "фильм с несуществующим id не должен обновляться");
     }
@@ -81,16 +97,25 @@ class FilmControllerTest {
         film.setDuration(100);
         film.setReleaseDate(LocalDate.of(2000, 2, 13));
 
-        filmController.createFilm(film);
+        Integer id = filmController.createFilm(film).getId();
 
         Film newFilm = new Film();
-        newFilm.setId(film.getId());
+        newFilm.setId(id);
         newFilm.setName("Фильм2");
         newFilm.setDescription("Описание2");
+        Mpa mpa = new Mpa();
+        mpa.setId(1);
+        newFilm.setMpa(mpa);
         newFilm.setDuration(66);
+
+        System.out.println("Film: " + film);
+        System.out.println("newFilm: " + newFilm);
+
+
         newFilm.setReleaseDate(LocalDate.of(1999, 3, 1));
         filmController.updateFilm(newFilm);
-        Equals.assertEqualsFilm(newFilm, filmController.getFilmById(film.getId()), "фильм должен обновляться");
+        System.out.println("newFilm поиск: " + filmController.getFilmById(id));
+        Equals.assertEqualsFilm(newFilm, filmController.getFilmById(id), "фильм должен обновляться");
     }
 
     @Test
@@ -164,7 +189,7 @@ class FilmControllerTest {
 
         filmController.createFilm(film);
 
-        Assertions.assertEquals(film, filmController.getFilmById(film.getId()),
+        Equals.assertEqualsFilm(film, filmController.getFilmById(film.getId()),
                 "Фильм должен находиться по id");
 
     }
@@ -198,12 +223,13 @@ class FilmControllerTest {
         User user = new User();
         user.setLogin("12 3 df");
         user.setEmail("12356@mail.ru");
+        user.setBirthday(LocalDate.of(1990,1,1));
 
         userController.createUser(user);
 
         filmController.putLike(film.getId(), user.getId());
 
-        Assertions.assertTrue(inMemoryFilmStorage.isUserLikesFilm(film.getId(), user.getId()),
+        Assertions.assertTrue(filmRepository.isUserLikesFilm(film.getId(), user.getId()),
                 "У фильма должен быть лайк от пользователя");
 
     }
@@ -221,6 +247,7 @@ class FilmControllerTest {
         User user = new User();
         user.setLogin("12 3 df");
         user.setEmail("12356@mail.ru");
+        user.setBirthday(LocalDate.of(1990,1,1));
 
         userController.createUser(user);
 
@@ -243,6 +270,7 @@ class FilmControllerTest {
         User user = new User();
         user.setLogin("12 3 df");
         user.setEmail("12356@mail.ru");
+        user.setBirthday(LocalDate.of(2000,1,1));
 
         userController.createUser(user);
 
@@ -258,29 +286,33 @@ class FilmControllerTest {
         film.setName("Фильм1");
         film.setDuration(100);
         film.setReleaseDate(LocalDate.of(2000,1,1));
-        filmController.createFilm(film);
+        Film createFilm = filmController.createFilm(film);
 
         User user1 = new User();
         user1.setLogin("12 3 df");
         user1.setEmail("12356@mail.ru");
+        user1.setBirthday(LocalDate.of(2000,1,1));
         userController.createUser(user1);
 
         User user2 = new User();
         user2.setLogin("12356 df");
         user2.setEmail("1235666@mail.ru");
+        user2.setBirthday(LocalDate.of(2000,1,1));
         userController.createUser(user2);
+
+
 
         filmController.putLike(film.getId(), user1.getId());
         filmController.putLike(film.getId(), user2.getId());
 
-        Assertions.assertTrue(inMemoryFilmStorage.isUserLikesFilm(film.getId(), user1.getId()),
+        Assertions.assertTrue(filmRepository.isUserLikesFilm(createFilm.getId(), user1.getId()),
                 "У фильма должен быть лайк от пользователя1 до удаления");
 
         filmController.deleteLike(film.getId(), user1.getId());
 
-        Assertions.assertFalse(inMemoryFilmStorage.isUserLikesFilm(film.getId(), user1.getId()),
+        Assertions.assertFalse(filmRepository.isUserLikesFilm(createFilm.getId(), user1.getId()),
                 "У фильма не должен быть лайка от пользователя1 после удаления");
-        Assertions.assertTrue(inMemoryFilmStorage.isUserLikesFilm(film.getId(), user2.getId()),
+        Assertions.assertTrue(filmRepository.isUserLikesFilm(createFilm.getId(), user2.getId()),
                 "Лайк от пользователя2 должен остаться");
     }
 
@@ -303,6 +335,7 @@ class FilmControllerTest {
             User user = new User();
             user.setLogin("12df" + i);
             user.setEmail("12356" + i + "@mail.ru");
+            user.setBirthday(LocalDate.of(2000,1,1));
             userController.createUser(user);
             listUsers.add(user);
         }
@@ -323,18 +356,18 @@ class FilmControllerTest {
 
         List<Film> popularFilms = new ArrayList<>(filmController.getPopularFilms(9));
 
-        Assertions.assertEquals(popularFilms.get(0),listFilms.get(5),
+        Equals.assertEqualsFilm(popularFilms.get(0),listFilms.get(5),
                 "Первый фильм в списке - 5");
 
-        Assertions.assertEquals(popularFilms.get(1),listFilms.get(10),
+        Equals.assertEqualsFilm(popularFilms.get(1),listFilms.get(10),
                 "Второй фильм в списке - 10");
 
-        Assertions.assertEquals(popularFilms.get(2),listFilms.get(12),
+        Equals.assertEqualsFilm(popularFilms.get(2),listFilms.get(12),
                 "Третий фильм в списке - 12");
 
-        Assertions.assertEquals(3, popularFilms.size(),
+        Assertions.assertEquals(9, popularFilms.size(),
                 "Список должен содержать 9 фильмов");
 
     }
-*/
+
 }

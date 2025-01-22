@@ -29,7 +29,9 @@ public class FilmService {
     public Film createFilm(Film film) {
 
         try {
-            mpaRepository.findById(film.getMpa().getId());
+            if(film.hasMpa()) {
+                mpaRepository.findById(film.getMpa().getId());
+            }
             if(film.hasGenres()) {
                 Set<Integer> notExistGenreIds = genreRepository.genresNotExist(film.getGenres());
                 if (!notExistGenreIds.isEmpty())
@@ -66,6 +68,7 @@ public class FilmService {
 
     public Film putLike(Integer filmId, Integer userId) {
         checkUserById(userId);
+        findFilmById(filmId);
         return filmRepository.putLike(filmId, userId);
     }
 

@@ -1,10 +1,8 @@
 package ru.yandex.practicum.filmorate.dal.mappers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -36,7 +34,6 @@ public class FilmRowMapper implements RowMapper<Film> {
         }
         film.setMpa(mpa);
 
-
         Set<Genre> genres = new HashSet<>();
         if (hasColumn(resultSet, "GENRE_ID")) {
             do {
@@ -47,8 +44,9 @@ public class FilmRowMapper implements RowMapper<Film> {
                 if (!resultSet.wasNull())
                     genres.add(genre);
             } while (resultSet.next() && resultSet.getInt("FILM_ID") == film.getId());
-        }
-        film.setGenres(new HashSet<>(genres));
+            film.setGenres(new HashSet<>(genres));
+        } else film.setGenres(null);
+
 
         return film;
     }
